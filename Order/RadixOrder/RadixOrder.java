@@ -2,17 +2,16 @@ import java.util.*;
 
 public class RadixOrder{
 
+	//digitIndex 表示对数字的倒数第几位进行排序
 	public static int[] order(int[] arr,int digitIndex){
 		final int MAX=10;
-		int[] sum = new int[MAX];
+		//统计该位上0-9各自出现的次数
 		int[] digitCount = new int[MAX];
+		//基于digitCount数组的前缀和数组
+		int[] sum = new int[MAX];
+		//结果返回数组
 		int[] result = new int[arr.length];
-		//表示一个数的倒数第几位
-		//int digitIndex = 3;
 
-		for (int i=1; i<arr.length; i++) {
-			sum[i] = arr[i]+sum[i-1];
-		}
 
 		int digit = getMaxDigit(arr);
 
@@ -37,10 +36,6 @@ public class RadixOrder{
 		return result;
 
 
-		// printArray(arr,"原始数组=");
-		// printArray(digitCount,"个位累加数组=");
-		// printArray(sum,"前缀和数组=");
-		// printArray(result,"结果数组=");
  	}
 
  	public static void printArray(int[] arr,String desc){
@@ -94,7 +89,7 @@ public class RadixOrder{
  	public static int[] getArr(int length,int max){
 		int[] arr= new int[length];
 		for (int i=0; i<length; i++) {
-			arr[i] = (int)(Math.random()*max);
+			arr[i] = (int)(Math.random()*max)-1000;
 		}
 		return arr;
 	}
@@ -104,7 +99,7 @@ public class RadixOrder{
 		Arrays.sort(_arr);
 
 		for (int i=0; i<_arr.length;i++ ) {
-			System.out.print(arr[i]+","+_arr[i]+"|");
+			//System.out.print(arr[i]+","+_arr[i]+"|");
 			if(arr[i] != _arr[i]){
 				return false;
 			}
@@ -120,35 +115,30 @@ public class RadixOrder{
 		return _arr;
 	}
 
-	public static void radixOrder(int[] arr){
+	public static int[] radixOrder(int[] arr){
 		int min=getMin(arr);
 		if(min<0){
 			negativeNumber(arr,min);
 		}
 		int digit = getMaxDigit(arr);
-// System.out.println("digit= "+digit);
 		int loop = 1;
 		while(digit>=loop){
-			printArray(arr,"原始数组=");
 			arr = order(arr,loop++);
 
 		}
 		if(min<0){
 			restoreArray(arr,min);
 		}
-
+		return arr;
 	}
 
 	public static Boolean isTrue(){
-		int max = 1;
+		int max = 1000000;
 		for (int i=0; i<max;i++ ) {
 
-			int[] arr=getArr(5,9999);
+			int[] arr=getArr(50,9999);
 			int[] _arr=copyArr(arr);
-//printArray(arr,"原始数组=");
-			//基数排序
-			radixOrder(arr);
-//printArray(arr,"XX数组=");
+			arr = radixOrder(arr);
 			if(!compar(arr,_arr)) return false;
 			
 		}
@@ -158,7 +148,6 @@ public class RadixOrder{
 
 
 	public static void main(String[] args){
-		
-		System.out.println("isTrue = "+isTrue());
+		System.out.println("ans = "+isTrue());
 	}
 }
