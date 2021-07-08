@@ -1,13 +1,19 @@
 import java.util.*;
 public class TreeStruct{
 
-	public class WrapTreeLineAndNode{
+	public class WrapTreeNode{
 
 		//当前节点
 		public TreeStruct currentNode;
 
 		//当前节点的位置，从左到右的空格数量
-		public int currentLeftSpace;
+		public int x;
+
+		//当前层前一个节点
+		public WrapTreeNode currLevelPrevNode;
+
+		//父节点
+		public WrapTreeNode parentNode;
 
 		//当前节点的类型：左/右孩子
 		//left  : 0
@@ -15,10 +21,35 @@ public class TreeStruct{
 		//root  : -1
 		public int childType;
 
-		public WrapTreeLineAndNode(TreeStruct _node,int type,int width){
+		public WrapTreeNode(
+			TreeStruct _node,
+			int type,
+			int _x,
+			WrapTreeNode parent,
+			WrapTreeNode prevNode){
 			currentNode = _node;
 			childType = type;
-			currentLeftSpace = width;
+			x = _x;
+			currLevelPrevNode = prevNode;
+			parentNode = parent;
+		}
+	}
+
+	public class TreeLine{
+
+		public TreeLine currLevelPrevLine;
+
+		//当前节点的位置，从左到右的空格数量
+		public int x;
+
+		//当前节点的类型：左/右孩子
+		//left  : 0
+		//right : 1
+		//root  : -1
+		public int childType;
+		public TreeLine(int _x,int type){
+			x =_x;
+			childType = type;
 		}
 	}
 
@@ -34,7 +65,7 @@ public class TreeStruct{
 	}
 
 	//先序，使用栈的方式
-	public static void perOrderByStack(TreeStruct root,ArrayList<String> list){
+	public  void perOrderByStack(TreeStruct root,ArrayList<String> list){
 		Stack<TreeStruct> stack = new Stack<TreeStruct>();
 
 		stack.push(root);
@@ -54,7 +85,7 @@ public class TreeStruct{
 	}
 
 	//先序，递归方式
-	public static void preOrder(TreeStruct root,ArrayList<String> list){
+	public  void preOrder(TreeStruct root,ArrayList<String> list){
 		if(root == null)
 			return;
 		//System.out.print(root.data+",");
@@ -68,7 +99,7 @@ public class TreeStruct{
 
 
 	//后序，递归方式
-	public static void lastOrder(TreeStruct root,ArrayList<String> list){
+	public  void lastOrder(TreeStruct root,ArrayList<String> list){
 		if(root == null) return;
 
 		lastOrder(root.left,list);
@@ -77,7 +108,7 @@ public class TreeStruct{
 	}
 
 	//后序，使用栈的方式
-	public static void lastOrderByStack(TreeStruct root,ArrayList<String> list){
+	public  void lastOrderByStack(TreeStruct root,ArrayList<String> list){
 
 		Stack<TreeStruct> stack = new Stack<TreeStruct>();
 		Stack<TreeStruct> help = new Stack<TreeStruct>();
@@ -103,7 +134,7 @@ public class TreeStruct{
 
 
 	//中序，递归方式
-	public static void inOrder(TreeStruct root,ArrayList<String> list){
+	public  void inOrder(TreeStruct root,ArrayList<String> list){
 		if(root == null) return ;
 		inOrder(root.left,list);
 		list.add(root.data);
@@ -111,7 +142,7 @@ public class TreeStruct{
 	}
 
 	//中序，使用栈的方式
-	public static void inOrderByStack(TreeStruct root,ArrayList<String> list){
+	public  void inOrderByStack(TreeStruct root,ArrayList<String> list){
 		Stack<TreeStruct> stack = new Stack<TreeStruct>();
 		TreeStruct curr = root;
 
@@ -131,7 +162,7 @@ public class TreeStruct{
 
 
 	//层次遍历树
-	public static void levelOrder(TreeStruct root,ArrayList<String> list){
+	public  void levelOrder(TreeStruct root,ArrayList<String> list){
 		Queue<TreeStruct> queue = new LinkedList<TreeStruct>();
 		queue.offer(root);
 
@@ -150,7 +181,7 @@ public class TreeStruct{
 
 
 	//获取树最大宽度
-	public static int getMaxWidth(TreeStruct root){
+	public  int getMaxWidth(TreeStruct root){
 		TreeStruct currEnd=root;
 		TreeStruct nextEnd=null;
 		int currCount=0;
@@ -182,7 +213,7 @@ public class TreeStruct{
 
 
 	//获取树最大高度
-	public static int getMaxLevel(TreeStruct root){
+	public  int getMaxLevel(TreeStruct root){
 		TreeStruct currEnd=root;
 		TreeStruct nextEnd=null;
 		int maxLevel=0;
@@ -209,70 +240,123 @@ public class TreeStruct{
 		return maxLevel;
 	}
 
+	private String getChildStr(TreeStruct root){
+		String str=root.data;
+		if(root.left != null) str = "^"+str;
+		if(root.right != null) str = str+"^";
+		return str;
+	}
 
+	private void printNode(WrapTreeNode node){
 
+		int perWidth = 15;
+		if(node.parentNode==null){
+			printStr(getStr(getChildStr(node.currentNode),node.x));
+			return;
+		}
+
+		if(node.currLevelPrevNode == null){
+			if(node.childType == 0){
+				int space = node.parentNode.x - perWidth;
+				printStr(getStr(getChildStr(node.currentNode),space));
+			}else{
+				int space = node.parentNode.x + perWidth;
+				printStr(getStr(getChildStr(node.currentNode),space));
+			}
+		}else{
+			int space = node.parentNode.x - node.currLevelPrevNode.x+perWidth;
+			printStr(getStr(getChildStr(node.currentNode),space));
+		}
+
+	}
 
 	//打印树
-	public static int printBinTree(TreeStruct root){
+	public  void printBinTree(TreeStruct root){
 
 		int maxWidth = 180;
 		int perWidth = 5;
 		int usedWidth = 0;
 		TreeStruct currEnd=root;
 		TreeStruct nextEnd=null;
+		boolean isFirst=true;
+		WrapTreeNode currLevelPrev=null;
 
-		Queue<WrapTreeLineAndNode> nodeQueue = new LinkedList<WrapTreeLineAndNode>();
-		Queue<WrapTreeLineAndNode> lineQueue = new LinkedList<WrapTreeLineAndNode>();
-		nodeQueue.offer(new WrapTreeLineAndNode(root,-1,(maxWidth-root.data.length())/2));
+
+		Queue<WrapTreeNode> nodeQueue = new LinkedList<WrapTreeNode>();
+		Queue<TreeLine> lineQueue = new LinkedList<TreeLine>();
+
+		nodeQueue.offer(
+			new WrapTreeNode(
+				root,-1,(maxWidth-root.data.length())/2,null,null));
 
 		while(!nodeQueue.isEmpty()){
 
-			WrapTreeLineAndNode curr = nodeQueue.poll();
-			int midd = curr.currentNode.currentLeftSpace;
+			WrapTreeNode curr = nodeQueue.poll();
+			printNode(curr);
+			//printStr(getStr(curr.currentNode.data,curr.x));
+			int midd = curr.x;
 
 			if(curr.currentNode.left !=null){
-
-				nodeQueue.offer(new WrapTreeLineAndNode(curr.currentNode.left,0,midd-perWidth));
-				lineQueue.offer(new WrapTreeLineAndNode(curr.currentNode.left,0,midd-perWidth));
+				WrapTreeNode l = new 
+				WrapTreeNode(curr.currentNode.left,0,midd-perWidth,isFirst?null:currLevelPrev,curr);
+				
+				
+				nodeQueue.offer(l);
+				lineQueue.offer(new TreeLine(midd-perWidth,0));
 				nextEnd = curr.currentNode.left;
+				currLevelPrev = l;
+
+				if(isFirst){
+					isFirst=false;
+				}
 
 			}
 			if(curr.currentNode.right !=null){
+				WrapTreeNode r = new 
+				WrapTreeNode(curr.currentNode.right,1,midd+perWidth,isFirst?null:currLevelPrev,curr);
 				
-				nodeQueue.offer(new WrapTreeLineAndNode(curr.currentNode.right,1,midd+perWidth));
-				lineQueue.offer(new WrapTreeLineAndNode(curr.currentNode.right,1,midd+perWidth));
+
+				nodeQueue.offer(r);
+				lineQueue.offer(new TreeLine(midd+perWidth,1));
 				nextEnd = curr.currentNode.right;
+				currLevelPrev = r;
+
+				if(isFirst){
+					isFirst=false;
+				}
 			}
 
 			if(curr.currentNode == currEnd){
 				printLine(lineQueue);
 				currEnd = nextEnd;
 				nextEnd = null;
+				currLevelPrev = null;
+				isFirst = true;
 			}
 		}
-		return maxCount;
 	}
 
-	private static void printLine(Queue<WrapTreeLineAndNode> lineQueue){
+	private  void printLine(Queue<TreeLine> lineQueue){
 		System.out.println();
-		while(!lineQueue.isEmpty()){
-			WrapTreeLineAndNode line = line.poll();
-			if(line.childType == 0){
-				printStr(getStr("/",line.currentLeftSpace));
-			}else{
-				printStr(getStr("\\",line.currentLeftSpace));
-			}
-		}
+		// while(!lineQueue.isEmpty()){
+		// 	TreeLine line = lineQueue.poll();
+		// 	if(line.childType == 1){
+		// 		printStr(getStr("/",line.x));
+		// 	}else{
+		// 		printStr(getStr("\\",line.x));
+		// 	}
+		// }
+		// System.out.println();
 	}
 
-	private static String getStr(String str,int spaceCount){
+	private  String getStr(String str,int spaceCount){
 		for (int i=0; i<spaceCount; i++) {
 			str= " "+str;
 		}
 		return str;
 	}
 
-	private static void printStr(String v){
+	private  void printStr(String v){
 		System.out.print(v);
 	}
 
@@ -287,36 +371,29 @@ public class TreeStruct{
 
 		TreeStruct p = root;
 		int left = maxLevel;
-		int right = maxLevel;
+
 
 		int random = (int)(Math.random()*9999);
+		int ont = (int)(Math.random()*8)+1;
 
-		while(left-- > 0){
-			TreeStruct node =getNode();
-			if(random % 7 >0){
-				p.left = node;
-				p.right=getNode();
-				p=node;
-			}
-			else{
-				p.right = node;
-				p = node;
-			}
-
-		}
-		p = root.right;
-		while(right-- > 0){
-			TreeStruct node =getNode();
-			if(random % 3 >0){
-				p.right = node;
+		while(left > 0){
+			if(left == maxLevel){
+				p.right = getNode();
 				p.left=getNode();
-				p=node;
+				p = p.left;
 			}
 			else{
-				p.left = node;
-				p = node;
+				if(random/left % ont >0){
+					p.left = getNode();
+					p=p.left;
+				}
+				else{
+					p.right = getNode();
+					p.left=getNode();
+					p = p.right;
+				}
 			}
-
+			left--;
 		}
 	}
 
@@ -329,15 +406,25 @@ public class TreeStruct{
 		return true;
 	}
 
+	public static TreeStruct getRandomBinTree(){
+		TreeStruct root = new TreeStruct("AAAA");
+
+		root.left = new TreeStruct("A1");
+		root.right = new TreeStruct("A2");
+		randomBinTree(root.left,7);
+		randomBinTree(root.right,6);
+
+		return root;
+	}
 	public static Boolean isTrue(){
 		int max = 1000000;
 		for (int i=0; i<max;i++ ) {
 			ArrayList<String> list = new ArrayList<String>();
 			ArrayList<String> list2 = new ArrayList<String>();
-			TreeStruct root = new TreeStruct("AAAA");
-			randomBinTree(root,500);
-			inOrder(root,list);
-			inOrderByStack(root,list2);
+				
+			TreeStruct root = getRandomBinTree();
+			root.inOrder(root,list);
+			root.inOrderByStack(root,list2);
 			if(!compar(list,list2)){
 				return false;
 			}
@@ -349,16 +436,20 @@ public class TreeStruct{
 	public static void printTreeTest(){
 		ArrayList<String> list = new ArrayList<String>();
 		TreeStruct root = new TreeStruct("AAAA");
-		randomBinTree(root,4);
-		printBinTree(root);
+
+		root.left = new TreeStruct("A1");
+		root.right = new TreeStruct("A2");
+		randomBinTree(root.left,7);
+		randomBinTree(root.right,6);
+		root.printBinTree(root);
 		//System.out.print("MaxLevel = "+getMaxLevel(root));
 		//System.out.print("MaxWidth = "+getMaxWidth(root));
 	}
 
 	public static void main(String[] args) {
 
-		//System.out.print("result = "+isTrue());
-		printTreeTest();
+		System.out.print("result = "+isTrue());
+		//printTreeTest();
 		
 	}
 
