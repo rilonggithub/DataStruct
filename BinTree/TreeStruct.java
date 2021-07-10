@@ -240,6 +240,74 @@ public class TreeStruct{
 		return maxLevel;
 	}
 
+	//将一棵树序列化
+	public Queue<String> getSerialization(TreeStruct root){
+		if(null == root) return null;
+		Queue<String> queue = new LinkedList<String>();
+		serialzation(root,queue);
+		return queue;
+	}
+
+	private void serialzation(TreeStruct root,Queue<String> queue){
+		if(root == null)
+			queue.offer("#");
+		else{
+			queue.offer(root.data);
+			serialzation(root.left,queue);
+			serialzation(root.right,queue);
+		}
+	}
+
+	//反序列化成一棵树
+	public TreeStruct unSerialztaion(Queue<String> queue){
+		if(null == queue || queue.size() == 0) return null;
+		return unSerial(queue);
+	}
+
+	private TreeStruct unSerial(Queue<String> queue){
+		String v = queue.poll();
+		if(v=="#") return null;
+		TreeStruct root = new TreeStruct(v);
+		root.left = unSerial(queue);
+		root.right = unSerial(queue);
+		return root;
+	}
+
+
+	public Boolean isCompleteBinTree(TreeStruct root){
+		if(root == null ||
+			root.left == null && root.right ==null ||
+			root.left !=null && root.right ==null) return true;
+
+		boolean isleaf=false;
+
+		Queue<TreeStruct> queue = new LinkedList<TreeStruct>();
+		queue.offer(root);
+
+
+		while(!queue.isEmpty()){
+
+			TreeStruct curr = queue.poll();
+			if(curr.right!=null && curr.left == null) 
+				return false;
+
+			if(curr.left == null && curr.right==null){
+				isleaf=true;
+			}
+			if(isleaf && (curr.left !=null || curr.right!=null))
+					return false;
+			
+
+			if(curr.left !=null)
+				queue.offer(curr.left);
+			if(curr.right!=null)
+				queue.offer(curr.right);
+		}
+		return true;
+	}
+
+
+
 	private String getChildStr(TreeStruct root){
 		String str=root.data;
 		if(root.left != null) str = "^"+str;
@@ -247,24 +315,31 @@ public class TreeStruct{
 		return str;
 	}
 
-	private void printNode(WrapTreeNode node){
+	private void printNode(WrapTreeNode node,int currLevel){
 
-		int perWidth = 15;
-		if(node.parentNode==null){
+		int perWidth = 20/currLevel;
+		if(node.parentNode == null){
 			printStr(getStr(getChildStr(node.currentNode),node.x));
 			return;
 		}
 
 		if(node.currLevelPrevNode == null){
+			//left
 			if(node.childType == 0){
 				int space = node.parentNode.x - perWidth;
 				printStr(getStr(getChildStr(node.currentNode),space));
-			}else{
+			}
+			//right
+			else{
 				int space = node.parentNode.x + perWidth;
 				printStr(getStr(getChildStr(node.currentNode),space));
 			}
 		}else{
 			int space = node.parentNode.x - node.currLevelPrevNode.x+perWidth;
+			if(space+node.currLevelPrevNode.x >node.parentNode.x && currLevel > 2){
+				space  = node.parentNode.x - node.currLevelPrevNode.x;
+			}
+			
 			printStr(getStr(getChildStr(node.currentNode),space));
 		}
 
@@ -274,11 +349,12 @@ public class TreeStruct{
 	public  void printBinTree(TreeStruct root){
 
 		int maxWidth = 180;
-		int perWidth = 5;
+		int perLeftWidth = 10;
+		int perRightWidth = 20;
 		int usedWidth = 0;
 		TreeStruct currEnd=root;
 		TreeStruct nextEnd=null;
-		boolean isFirst=true;
+		int currLevel =1;
 		WrapTreeNode currLevelPrev=null;
 
 
@@ -292,38 +368,39 @@ public class TreeStruct{
 		while(!nodeQueue.isEmpty()){
 
 			WrapTreeNode curr = nodeQueue.poll();
-			printNode(curr);
+			printNode(curr,currLevel);
 			//printStr(getStr(curr.currentNode.data,curr.x));
 			int midd = curr.x;
 
 			if(curr.currentNode.left !=null){
 				WrapTreeNode l = new 
-				WrapTreeNode(curr.currentNode.left,0,midd-perWidth,isFirst?null:currLevelPrev,curr);
+				WrapTreeNode(curr.currentNode.left,
+					0,
+					midd-perLeftWidth,
+					curr,
+					currLevelPrev);
 				
 				
 				nodeQueue.offer(l);
-				lineQueue.offer(new TreeLine(midd-perWidth,0));
+				//lineQueue.offer(new TreeLine(midd-perWidth,0));
 				nextEnd = curr.currentNode.left;
 				currLevelPrev = l;
 
-				if(isFirst){
-					isFirst=false;
-				}
 
 			}
 			if(curr.currentNode.right !=null){
 				WrapTreeNode r = new 
-				WrapTreeNode(curr.currentNode.right,1,midd+perWidth,isFirst?null:currLevelPrev,curr);
+				WrapTreeNode(curr.currentNode.right,
+					1,
+					midd+perRightWidth,
+					curr,
+					currLevelPrev);
 				
 
 				nodeQueue.offer(r);
-				lineQueue.offer(new TreeLine(midd+perWidth,1));
+				//lineQueue.offer(new TreeLine(midd+perWidth,1));
 				nextEnd = curr.currentNode.right;
 				currLevelPrev = r;
-
-				if(isFirst){
-					isFirst=false;
-				}
 			}
 
 			if(curr.currentNode == currEnd){
@@ -331,12 +408,15 @@ public class TreeStruct{
 				currEnd = nextEnd;
 				nextEnd = null;
 				currLevelPrev = null;
-				isFirst = true;
+				currLevel++;
 			}
 		}
 	}
 
 	private  void printLine(Queue<TreeLine> lineQueue){
+		System.out.println();
+		System.out.println();
+		System.out.println();
 		System.out.println();
 		// while(!lineQueue.isEmpty()){
 		// 	TreeLine line = lineQueue.poll();
@@ -359,6 +439,7 @@ public class TreeStruct{
 	private  void printStr(String v){
 		System.out.print(v);
 	}
+
 
 
 
@@ -411,8 +492,8 @@ public class TreeStruct{
 
 		root.left = new TreeStruct("A1");
 		root.right = new TreeStruct("A2");
-		randomBinTree(root.left,7);
-		randomBinTree(root.right,6);
+		randomBinTree(root.left,2);
+		randomBinTree(root.right,1);
 
 		return root;
 	}
@@ -433,23 +514,33 @@ public class TreeStruct{
 		
 	}
 
-	public static void printTreeTest(){
-		ArrayList<String> list = new ArrayList<String>();
-		TreeStruct root = new TreeStruct("AAAA");
+	
 
-		root.left = new TreeStruct("A1");
-		root.right = new TreeStruct("A2");
-		randomBinTree(root.left,7);
-		randomBinTree(root.right,6);
+	public static void printSerialztion(TreeStruct root){
+		//TreeStruct root = getRandomBinTree();
+		Queue<String> queue = root.getSerialization(root);
+		while(!queue.isEmpty())
+		{
+			System.out.print(queue.poll()+",");
+		}
+	}
+
+	public static void getUnSerialzation(Queue<String> queue){
+		TreeStruct root = (new TreeStruct("")).unSerialztaion(queue);
 		root.printBinTree(root);
-		//System.out.print("MaxLevel = "+getMaxLevel(root));
-		//System.out.print("MaxWidth = "+getMaxWidth(root));
+	}
+
+	public static TreeStruct printTreeTest(){
+		TreeStruct root = getRandomBinTree();
+		root.printBinTree(root);
+		return root;
 	}
 
 	public static void main(String[] args) {
 
-		System.out.print("result = "+isTrue());
-		//printTreeTest();
+		TreeStruct root = printTreeTest();
+		printSerialztion(root);
+		System.out.print("result = "+root.isCompleteBinTree(root));
 		
 	}
 
