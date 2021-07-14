@@ -14,18 +14,127 @@ public class IsCBT{
 		}
 	}
 
+	public static Node getRandomTree(int maxLevel){
+		return randomTree(1,maxLevel);
+	}
+
+	public static Node randomTree(int currLevel,int maxLevel){
+		if(currLevel>maxLevel || Math.random() > 0.9)
+			return null;
+
+		Node head = new Node((int)Math.random()*1000);
+		head.left = randomTree(currLevel+1,maxLevel);
+		head.right = randomTree(currLevel+1,maxLevel);
+
+		return head;
+	}
+
+	public static boolean isCBT_Old(Node head){
+		if(head == null)
+			return true;
+
+		Queue<Node> queue = new LinkedList<Node>();
+		queue.add(head);
+
+		Node l=null;
+		Node r=null;
+		Node curr=null;
+		boolean leaf=false;
+
+
+		while(!queue.isEmpty()){
+			curr = queue.poll();
+			l = curr.left;
+			r = curr.right;
+
+			if(
+				(leaf && (l !=null || r != null))
+				||
+				(l == null && r != null)
+			){
+				return false;
+			}
+
+			if(l != null){
+				queue.add(l);
+			}
+			if(r != null){
+				queue.add(r);
+			}
+
+			if(l == null || r == null){
+				leaf=true;
+			}
+		}
+		return true;
+	}
 
 	public static class Info{
 		public boolean isFull;
 		public boolean isCBT;
-		public int high;
+		public int hight;
 
 		public Info(boolean full,boolean cbt,int h){
 			isFull = full;
 			isCBT = cbt;
-			high = h;
+			hight = h;
 		}
 	}
+
+	public static boolean isCBT_New(Node head){
+		if(head == null){
+			return true;
+		}
+		return process(head).isCBT;
+
+
+	}
+
+	public static Info process(Node head){
+		if(head == null){
+			return new Info(true,true,0);
+		}
+
+		Info l = process(head.left);
+		Info r = process(head.right);
+
+		boolean isFull=false;
+		boolean isCBT=false;
+		int hight = Math.max(l.hight,r.hight)+1;
+
+		if(l.isFull && r.isFull && l.hight == r.hight){
+			isFull = true;
+		}
+
+		if(isFull){
+			isCBT = true;
+		}
+		else{
+
+			if(l.isCBT && r.isCBT){
+
+				if(l.isFull && r.isFull && l.hight == r.hight +1 )
+					isCBT = true;
+
+				if(l.isCBT && r.isFull && l.hight == r.hight +1 )
+					isCBT = true;
+
+				if(l.isFull && r.isCBT && l.hight == r.hight)
+					isCBT = true;
+			}
+		}
+
+		return new Info(isFull,isCBT,hight);
+	}
+
+
+
+
+
+
+
+
+
 
 	public static void printTree(Node head) {
 		System.out.println("Binary Tree:");
@@ -57,124 +166,31 @@ public class IsCBT{
 	}
 
 
-	public static Info process(Node head){
-		if(head == null){
-			return new Info(true,true,0);
-		}
-
-		Info leftInfo = process(head.left);
-		Info rightInfo = process(head.right);
-
-		boolean isFull=false;
-		boolean isCBT=false;
-		int high = Math.max(leftInfo.high,rightInfo.high)+1;
-
-		if(leftInfo.isFull &&
-		   rightInfo.isFull &&
-		   leftInfo.high == rightInfo.high){
-			isFull=true;
-		}
-
-		if(isFull){
-			isCBT=true;
-		}else{
-
-			if(leftInfo.isCBT && rightInfo.isCBT){
-
-				if(leftInfo.isCBT 
-					&& rightInfo.isFull 
-					&& leftInfo.high == rightInfo.high+1)
-				{
-					isCBT = true;
-				}
-
-				if(leftInfo.isFull && 
-				   rightInfo.isFull &&
-					leftInfo.high == rightInfo.high+1)
-				{
-					isCBT=true;
-				}
-
-				if(leftInfo.isFull && rightInfo.isCBT &&
-					leftInfo.high == rightInfo.high)
-				{
-					isCBT=true;
-				}
 
 
-			}
-		}
-		return new Info(isFull,isCBT,high);
-	}
 
-	public static boolean isCBT(Node head){
-		return process(head).isCBT;
-	}
 
-	public static boolean isCBT2(Node head){
-		if (head == null) {
-			return true;
-		}
-		Queue<Node> queue=new LinkedList<Node>();
-		queue.offer(head);
-		boolean leaf = false;
 
-		while(!queue.isEmpty()){
-			Node curr = queue.poll();
 
-			Node l = curr.left;
-			Node r = curr.right;
 
-			if(
-				(leaf && (l!=null || r!=null))
-				||
-				(l==null && r!=null)
-			){
-				return false;
-			}
-
-			if(l != null)
-				queue.offer(l);
-			if(r!=null)
-				queue.offer(r);
-
-			if(l ==null || r == null)
-				leaf=true;
-		}
-		return true;
-	}
-
-	public static Node getRandmoTree(int max){
-		return randomTree(1,max);
-	}
-
-	public static Node randomTree(int currLevel,int maxLevel){
-		if(currLevel>maxLevel || Math.random()>0.9)
-			return null;
-
-		Node head = new Node((int)(Math.random()*100));
-		head.left = randomTree(currLevel+1,maxLevel);
-		head.right = randomTree(currLevel+1,maxLevel);
-
-		return head;
-	}
 
 	public static boolean isTrue(){
-		int max = 10000;
+		int max=10;
 		for (int i=0; i<max; i++) {
-			Node root = getRandmoTree(3);
-			boolean is1=isCBT(root);
-			boolean is2=isCBT2(root);
-			
-			if(is1 != is2){
-				System.out.println("isCBT = "+is1);
-				System.out.println("isCBT2 = "+is2);
-				printTree(root);
+			Node root = getRandomTree(4);
+			boolean _old = isCBT_Old(root);
+			boolean _new = isCBT_New(root);
+
+			if(_old != _new){
 				return false;
+			}
+			if(_old&&_new){
+				printTree(root);
 			}
 		}
 		return true;
 	}
+
 
 	public static void main(String[] args){
 		System.out.println("Result = "+isTrue());
