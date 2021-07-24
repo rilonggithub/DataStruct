@@ -1,4 +1,4 @@
- import java.util.*;
+import java.util.*;
 
 public class Graph{
 
@@ -220,24 +220,46 @@ public class Graph{
 	}
 
 
+	public List<Node> topologicalSort(){
+		List<Node> result = new ArrayList<>();
+
+
+		Stack<Node> stack = new Stack<>();
+		for (Node node : nodes.values() ) {
+			if(node.in ==0){
+				stack.push(node);
+			}
+		}
+
+		while(!stack.isEmpty()){
+			Node curr = stack.pop();
+			result.add(curr);
+			System.out.print(curr.value+",");
+
+			for (Node next : curr.nexts) {
+				--next.in;
+				if(next.in ==0){
+					stack.push(next);
+				}
+			}
+		}
+		return result;
+	}
+
+
 	public static void main(String[] args){
 		Graph g = new Graph();
 		int[][] arr=new int[][]{
 			{4,1,4},
 			{2,4,2},
 			{40,3,4},
-			{14,2,1},
 			{9,4,5},
 			{2,1,3},
 			{1,12,17},
 			{11,12,13},
-			{10,13,1},
 			{1,3,7},
 			{7,5,9},
-			{17,13,12},
 			{5,2,8},
-			{21,5,4},
-			{13,2,3},
 			{100,8,17},
 			{5,2,7},
 			{1,17,13}
@@ -249,6 +271,8 @@ public class Graph{
 		for (Edge e:eArray) {
 			System.out.println(e.from.value+"--->"+e.to.value);
 		}
+
+		g.topologicalSort();
 	}
 
 }
