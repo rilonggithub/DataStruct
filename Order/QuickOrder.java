@@ -10,12 +10,19 @@ public class QuickOrder{
 
 	public int[] process(int[] arr,int left,int right){
 		
+		if (left > right) { // L...R L>R
+			return new int[] { -1, -1 };
+		}
+		if (left == right) {
+			return new int[] { left, right };
+		}
+
 		int less = left -1;
 		int R = right-1;
-		int more = right -1;
+		int more = right;
 		int index = left;
 
-		swap(arr, (int)(Math.random()* right),R);
+		swap(arr, left + (int) (Math.random() * (right - left + 1)),R);
 
 		while(index<more){
 			if(arr[index] == arr[R]){
