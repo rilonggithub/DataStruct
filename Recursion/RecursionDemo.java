@@ -93,7 +93,7 @@ public class RecursionDemo{
 
 
 
-/**************************************** reboot2  *************************************/
+/**************************************** robot2  *************************************/
 
 	public static long reboot2(int size,int start,int aim,int rest){
 		long[][] dp = new long[size+1][rest+1];
@@ -224,12 +224,59 @@ public class RecursionDemo{
 	}
 
 
+	public static int[][] getMatrix(int row,int clo){
+		
+		int[][] arr=new int[row][clo];
+		for (int i=0; i<row; i++) {
+			for (int j=0; j<clo; j++) {
+				arr[i][j] = i==0&&j==0?0:(int)(Math.random()*2);
+			}
+			
+		}
+		return arr;
+	}
+
+	public static int[][] copyMatrix(int[][] m){
+		
+		int[][] arr=new int[m.length][m[0].length];
+		for (int i=0; i<m.length; i++) {
+			for (int j=0; j<m[0].length; j++) {
+				arr[i][j] = m[i][j];
+			}
+			
+		}
+		return arr;
+	}
+
+
+
 
 
 
 
 
 /**************************************** Bag  *************************************/
+
+
+	public static int bag2(int[] w,int[] v,int bag){
+		int N = w.length;
+
+		int[][] dp = new int[N+1][bag+1];
+
+		for (int i=N-1; i>=0; i--) {
+			for (int rest=0; rest<=bag;rest++ ) {
+				int p1 = dp[i+1][rest];
+				int p2=0;
+				int next = rest-w[i]<0?-1:dp[i+1][rest-w[i]];
+				if(next != -1){
+					p2 = v[i]+next;
+				}
+				dp[i][rest] = Math.max(p1,p2);
+			}
+		}
+		return dp[0][bag];
+	}
+
 
 	public static int bag1(int[] w,int[] v,int bag){
 		return process3(w,v,0,bag);
@@ -259,6 +306,26 @@ public class RecursionDemo{
 
 
 /**************************************** Cut  *************************************/
+
+	public static int cut1(int[]w,int[] v,int restLength){
+		int[] dp = new int[restLength+1];
+		for (int i=1; i<=restLength; i++) {
+			int max=0;
+			for (int j=1; j<=i&&j<v.length;j++ ) {
+				int r = restLength- w[j-1];
+				if(r>=0){
+					 max= Math.max(v[j-1]+dp[i-j],max);
+				}
+			}
+			dp[i]=max;
+		}
+		System.out.println();
+		for (int i=0; i<=restLength; i++) {
+			System.out.print(dp[i]+",");
+		}
+		System.out.println();
+		return dp[restLength];
+	}
 
 	public static int cut(int[]w,int[] v,int restLength){
 		List<String> list= new ArrayList<String>();
@@ -313,10 +380,10 @@ public class RecursionDemo{
 			int r = rest-w[i-1];
 			if(r>=0){
 
-				String p=path+v[i-1]+",";
-				System.out.println("path = "+p+"$r="+r);
+				 String p=path+v[i-1]+",";
+				// System.out.println("path = "+p+"$r="+r);
 				
-				int p1=v[i-1]+process4(w,v,r,p,list,dp);
+				int p1=v[i-1]+process4(w,v,rest-w[i-1],p,list,dp);
 				max= Math.max(max,p1);
 
 			}
@@ -329,6 +396,63 @@ public class RecursionDemo{
 
 
 
+
+
+/**************************************** 迷宫  *************************************/
+
+
+	public static boolean migong(int[][] arr,int[] start,int[] end){
+		int curRow=start[0];
+		int curClo=start[1];
+		boolean[] result = new boolean[]{false};
+		migongProcess(arr,end,curRow,curClo,result);
+		return result[0];
+	}
+
+	public static void migongProcess(int[][] arr,int[] end,int curRow,int curClo,boolean[] result){
+
+		if(result[0]) return;
+
+		if(curRow<0 ||curClo<0 || curRow==arr.length || curClo==arr[0].length) return;
+
+		if(curRow == end[0] && curClo == end[1] && arr[curRow][curClo] == 0){
+			result[0]=true;
+		}
+		
+
+		if(arr[curRow][curClo] == 0){
+			arr[curRow][curClo]=8;
+			migongProcess(arr,end,curRow,curClo+1,result); //right
+			migongProcess(arr,end,curRow,curClo-1,result); //left
+			migongProcess(arr,end,curRow+1,curClo,result); //bottom
+			migongProcess(arr,end,curRow-1,curClo,result); //top
+
+		}
+	}
+
+
+	public static void migongPrint(){
+		for (int w=0; w<1000;w++ ) {
+			int[][] arr= getMatrix(20,20);
+			
+
+			int[] start = new int[]{0,0};
+			int[] end = new int[]{arr.length-1,arr[0].length-1};
+			boolean r=migong(arr,start,end);
+			if(r){
+				for (int i=0;i<arr.length;i++) {
+					System.out.println();
+					for (int j=0; j<arr[0].length;j++ ) {
+						System.out.print(arr[i][j]+",");
+					}
+				}
+				System.out.println();
+				System.out.println("result="+r);
+				return;
+			}
+			
+		}
+	}
 
 
 
@@ -351,14 +475,23 @@ public class RecursionDemo{
 		// int[] _arr = getArray();
 		// int result=win1(_arr);
 
-		// int[] w=new int[]{1,2,3,4,5};
-		// int[] v=new int[]{1,5,8,9,10};
-		// System.out.println(bag1(w,v,4));
+		int[] w=new int[]{1,2,3,4,5};
+		int[] v=new int[]{1,5,8,9,10};
+		System.out.println(bag1(w,v,4));
+		System.out.println(bag2(w,v,4));
 
 		//				   1 2 3 4  5  6
-		int[] w=new  int[]{1,2};
-		int[] v1=new int[]{2,5};
-		System.out.println("max="+cut(w,v1,4));
+		// int[] w=new  int[]{1,2,3,4,5};
+		// int[] v1=new int[]{2,5,1,9,4};
+		// System.out.println("max="+cut(w,v1,140));
+		// System.out.println("max="+cut1(w,v1,140));
 
+		//migongPrint();
+		
 	}
 }
+
+
+
+
+
