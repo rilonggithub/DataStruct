@@ -83,14 +83,91 @@ public class SplitNumberProblem{
 		for (int ci = index;  ci<arr.length&&rest - arr[ci]>=0; ci++) {
 			ways += process2(arr,rest-arr[ci],ci,path+arr[ci]+",",dp);
 			
-		}
+		 }
+
+		
 		dp[rest][index] = ways;
 		return ways;
 	}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	public static int splitNum3(int num){
+		
+		return process3(1,num,"");
+	}
+
+
+	public static int process3(int pre,int rest,String path){
+
+		if(rest == 0){
+			//System.out.println(path);
+			return 1;
+		}
+		if(pre > rest){
+			return 0;
+		}
+		if(rest == pre){
+			//System.out.println(path);
+			return 1;
+		}
+
+		int ways=0;
+
+
+		for (int first = pre;  first<=rest; first++) {
+			ways += process3(first,rest-first,path+first+",");
+			
+		}
+		return ways;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	
+
 	public static void main(String[] args){
-		int num = 100;
-		System.out.println("C = "+splitNum(num));
+		int num = 70;
+		//System.out.println("C = "+splitNum(num));
 		System.out.println("C = "+splitNum2(num));
+		System.out.println("C = "+splitNum3(num));
 	}
 }
