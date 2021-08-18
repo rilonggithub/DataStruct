@@ -59,7 +59,7 @@ public class DanDiaoStackEqual{
 
 
 	public static void main(String[] args){
-		int[] arr= new int[]{2,3,3,3,3,1,3,0,7,3};
+		int[] arr= new int[]{3,5,1,4,2,3,7,5,2,4,5,2,0};
 		DanDiaoStackEqual dan=new DanDiaoStackEqual(arr);
 		int[][] result = dan.getResult();
 		for (int i=0; i<result.length;i++ ) {
@@ -68,5 +68,27 @@ public class DanDiaoStackEqual{
 			}
 			System.out.println();
 		}
+
+
+		int max = 0;
+		int index = 0;
+		int start = 0;
+		int end = 0;
+
+		for (int i=0; i<arr.length;i++ ) {
+			int L = result[i][0] == -1 ? 0:result[i][0]+1;
+			int R = result[i][1] == -1 ? arr.length:result[i][1];
+			if(arr[i]*(R-L) > max){
+				max = arr[i]*(R-L);
+				index = i;
+				start = L;
+				end = R;
+			}
+
+			System.out.println("max  ="+max+"; index = "+i+"(R-L) = "+(R-L));
+		}
+
+		System.out.println("max  ="+max+"; index = "+index);
+		System.out.println("range=["+(start)+","+(end-1)+"]");
 	}
 }
